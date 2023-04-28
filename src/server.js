@@ -15,10 +15,8 @@ app.use(express.static('public'))
 
 const httpServer = http.createServer(app);
 
+httpServer.listen(porta, () => console.log(`Servidor rodando na porta ${porta}`));
+
 const io = new Server(httpServer);
 
-io.on("connection", (socket) => {
-    console.log('cliente se conectou');
-})
-
-httpServer.listen(porta, () => console.log(`Servidor rodando na porta ${porta}`));
+export default io;
