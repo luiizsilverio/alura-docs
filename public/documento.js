@@ -1,9 +1,20 @@
-import { enviarTexto } from "./socket-front.js";
+import { enviarTexto, selecionarDocumento } from "./socket-front.js";
 
+const param = new URLSearchParams(window.location.search);
+const nomeDoc = param.get("nome") || "Documento sem título";
+
+const tituloEl = document.getElementById("titulo-documento");
 const editorTexto = document.querySelector("textarea#editor-texto");
 
+tituloEl.textContent = nomeDoc;
+
+selecionarDocumento(nomeDoc);
+
 editorTexto.addEventListener("keyup", () => {   
-    enviarTexto(editorTexto.value);
+    enviarTexto({
+        texto: editorTexto.value, 
+        nomeDoc
+    });
 })
 
 function atualizaTextoEditor(texto) {
