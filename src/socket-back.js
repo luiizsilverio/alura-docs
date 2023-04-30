@@ -2,7 +2,7 @@ import io from "./server.js";
 
 const documentos = [
     {
-        nome: "Javascript",
+        nome: "JavaScript",
         texto: "texto de javascript..."
     },
     {
@@ -18,18 +18,24 @@ const documentos = [
 io.on("connection", (socket) => {
     console.log('cliente se conectou! ID:', socket.id);
 
-    socket.on("selecionar_documento", (nomeDoc) => {
+    socket.on("selecionar_documento", (nomeDoc, callback) => {
         socket.join(nomeDoc);
+
+        const documento = encontrarDocumento(nomeDoc);
+        
+        if (documento) {
+            callback(documento.texto);
+        }
     })
 
     socket.on("send_text", ({ texto, nomeDoc }) => {
-        // io.emit("send_text_clients", texto); // envia o texto recebido p/ todos os clientes
+        const documento = encontrarDocumento(nomeDoc);
 
-        // envia o texto recebido p/ todos os clientes, menos p/ si mesmo
-        // socket.broadcast.emit("send_text_clients", texto);
-
-        // envia o texto recebido p/ todos os clientes  de uma determinada sala (nomeDoc), menos p/ si mesmo
-        socket.to(nomeDoc).emit("send_text_clients", texto);
+        if (documento) {
+            documento.texto = texto;
+            // envia o texto recebido p/ todos os clientes  de uma determinada sala (nomeDoc), menos p/ si mesmo
+            socket.to(nomeDoc).emit("send_text_clients", texto);
+        }
     })
 
     socket.on("disconnect", (motivo) => {
@@ -37,3 +43,8 @@ io.on("connection", (socket) => {
     });
 
 })
+
+function encontrarDocumento(nome) {
+    const documento = documentos.find(doc => doc.nome === nome);
+    return documento;
+}
