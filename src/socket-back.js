@@ -1,8 +1,34 @@
 import io from "./server.js";
-import { atualizaDocumento, encontrarDocumento } from "./documentosDb.js";
+
+import { 
+    adicionarDocumento, 
+    atualizaDocumento, 
+    encontrarDocumento, 
+    excluirDocumento, 
+    obterDocumentos 
+} from "./documentosDb.js";
 
 io.on("connection", (socket) => {
     console.log('cliente se conectou! ID:', socket.id);
+
+    socket.on("obter_documentos", async (callback) => {
+        const documentos = await obterDocumentos();
+        callback(documentos);
+    })
+
+    socket.on("adicionar_documento", async (nomeDoc) => {
+        const documentoExiste = (await encontrarDocumento(nomeDoc)) !== null;
+
+        if (documentoExiste) {
+            socket.emit("documento_existe", nomeDoc);
+        } else {
+            const resultado = await adicionarDocumento(nomeDoc);
+            
+            if (resultado.acknowledged) {
+                io.emit("adicionar_documento_interface", nomeDoc);
+            }
+        }
+    })
 
     socket.on("selecionar_documento", async (nomeDoc, callback) => {
         socket.join(nomeDoc);
@@ -27,4 +53,11 @@ io.on("connection", (socket) => {
         console.log(`Cliente "${socket.id}" desconectado! Motivo: ${motivo}`);
     });
 
+    socket.on("excluir_documento", async (nomeDoc) => {
+        const resultado = await excluirDocumento(nomeDoc);
+
+        if (resultado.deletedCount) {
+            io.emit("excluir_documento_sucesso", nomeDoc);
+        }
+    })
 })

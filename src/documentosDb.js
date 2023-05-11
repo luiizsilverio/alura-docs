@@ -17,4 +17,30 @@ function atualizaDocumento(nomeDoc, texto) {
     return atualizacao;
 }
 
-export { encontrarDocumento, atualizaDocumento };
+function obterDocumentos() {
+    const documentos = documentosCollection.find().toArray();
+    return documentos;
+}
+
+function adicionarDocumento(nomeDoc) {
+    const resultado = documentosCollection.insertOne({
+        nome: nomeDoc,
+        texto: ""
+    })
+    return resultado;
+}
+
+function excluirDocumento(nomeDoc) {
+    const resultado = documentosCollection.deleteOne({
+        nome: nomeDoc
+    })
+    return resultado;
+}
+
+export { 
+    encontrarDocumento, 
+    atualizaDocumento, 
+    obterDocumentos, 
+    adicionarDocumento, 
+    excluirDocumento 
+};
